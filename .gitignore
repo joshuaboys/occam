@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # APS session baseline (ephemeral)
 .claude/.aps-session-baseline
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
