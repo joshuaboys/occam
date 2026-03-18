@@ -40,8 +40,8 @@ There is no lightweight, stateless CLI tool for executing single-shot agent task
 
 | Module | Purpose | Status | Dependencies |
 |--------|---------|--------|--------------|
-| [CLI](./modules/01-cli-entry.aps.md) | Entry point, arg parsing, stdin, invocation | Draft | — |
-| [AGENT](./modules/02-agent-config.aps.md) | TOML agent definition resolution | Draft | — |
+| [CLI](./modules/01-cli-entry.aps.md) | Entry point, arg parsing, stdin, invocation | In Progress | — |
+| [AGENT](./modules/02-agent-config.aps.md) | TOML agent definition resolution | In Progress | — |
 | [CTX](./modules/03-context-assembly.aps.md) | Prompt and runtime context assembly | Draft | AGENT, SKILL |
 | [PROVIDER](./modules/04-provider.aps.md) | Provider abstraction and LLM invocation | Draft | CTX |
 | [SKILL](./modules/05-skill-support.aps.md) | Reusable skill instruction loading | Draft | — |
