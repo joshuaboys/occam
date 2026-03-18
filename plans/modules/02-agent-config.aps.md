@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| AGENT | Josh Boys | Draft |
+| AGENT | Josh Boys | In Progress |
 
 ## Purpose
 
@@ -43,7 +43,19 @@ Change status to **Ready** when:
 
 ## Work Items
 
-*No tasks yet — module is Draft*
+### AGENT-001: TOML agent definition loading and validation
+
+- **Status:** Complete: 2026-03-18
+- **Intent:** Parse TOML agent files into validated, normalised AgentConfig structures
+- **Expected Outcome:** `loadAgent()` discovers, parses, validates, and normalises agent definitions with sensible defaults
+- **Validation:** `bun test tests/agent.test.ts`
+- **Files:** `src/agent/schema.ts`, `src/agent/validate.ts`, `src/agent/resolve.ts`, `src/agent/index.ts`
+
+### AGENT-002: Expand TOML schema for advanced features
+
+- **Status:** Draft
+- **Intent:** Support additional agent config fields as CTX and PROVIDER modules mature
+- **Dependencies:** CTX, PROVIDER modules
 
 ## Execution *(optional)*
 

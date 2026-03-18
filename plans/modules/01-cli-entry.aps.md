@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| CLI | Josh Boys | Draft |
+| CLI | Josh Boys | In Progress |
 
 ## Purpose
 
@@ -49,7 +49,28 @@ Change status to **Ready** when:
 
 ## Work Items
 
-*No tasks yet — module is Draft*
+### CLI-001: CLI argument parsing and stdin reading
+
+- **Status:** Complete: 2026-03-18
+- **Intent:** Parse CLI arguments and read piped stdin into typed structures
+- **Expected Outcome:** `parseArgs()` handles all flags, `readStdin()` captures piped input
+- **Validation:** `bun test tests/cli.test.ts`
+- **Files:** `src/cli/args.ts`, `src/cli/stdin.ts`
+
+### CLI-002: Lifecycle orchestration and entry point
+
+- **Status:** Complete: 2026-03-18
+- **Intent:** Orchestrate the single-run lifecycle from invocation to exit
+- **Expected Outcome:** `run()` resolves agent, captures stdin, emits output, returns exit code
+- **Validation:** `bun test tests/cli.test.ts`
+- **Files:** `src/cli/lifecycle.ts`, `src/main.ts`
+
+### CLI-003: Wire CTX, PROVIDER, and OUTPUT modules into lifecycle
+
+- **Status:** Draft
+- **Intent:** Replace placeholder output with real context assembly, provider invocation, and output emission
+- **Expected Outcome:** Full end-to-end agent execution through the CLI
+- **Dependencies:** CTX, PROVIDER, OUTPUT modules
 
 ## Execution *(optional)*
 
