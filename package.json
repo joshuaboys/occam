@@ -1,0 +1,24 @@
+{
+  "name": "occam",
+  "version": "0.1.0",
+  "description": "Lightweight, stateless CLI tool for executing single-shot agent tasks",
+  "type": "module",
+  "bin": {
+    "occam": "./src/main.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/main.ts",
+    "build": "bun build src/main.ts --compile --outfile occam",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT",
+  "author": "Josh Boys"
+}
