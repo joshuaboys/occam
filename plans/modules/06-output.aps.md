@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| OUT | Josh Boys | Ready |
+| OUT | Josh Boys | Complete |
 
 ## Purpose
 
@@ -52,18 +52,21 @@ Change status to **Ready** when:
 - **Intent:** Command substitution captures only the task result.
 - **Expected Outcome:** Progress and driver logs never appear on stdout; `--quiet` silences progress on stderr.
 - **Validation:** `cargo test -q --test output_streams`
+- **Status:** Complete
 
 ### OUT-002: Schema guarantee
 
 - **Intent:** A schema task either prints valid JSON or fails closed.
 - **Expected Outcome:** Valid body → exit `0`; one repair then still invalid → exit `7` and no invalid stdout; unsupported structured output → exit `8`.
 - **Validation:** `cargo test -q --test output_schema`
+- **Status:** Complete
 
 ### OUT-003: Exit code mapping
 
 - **Intent:** Callers can branch on Occam codes without knowing the driver.
 - **Expected Outcome:** Documented mapping holds for success, usage error, missing driver, auth required, driver fail, timeout, validation fail, unsupported.
 - **Validation:** `cargo test -q --test output_exit_codes`
+- **Status:** Complete
 
 ## Execution *(optional)*
 

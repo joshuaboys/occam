@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| TSK | Josh Boys | Ready |
+| TSK | Josh Boys | Complete |
 
 ## Purpose
 
@@ -48,12 +48,14 @@ Change status to **Ready** when:
 - **Intent:** A `[task.review]` table becomes a structured task definition with documented defaults.
 - **Expected Outcome:** Required `instructions` present; `output` defaults to `text`; invalid field types fail with exit `2`.
 - **Validation:** `cargo test -q --test task_parse`
+- **Status:** Complete
 
 ### TSK-002: Closed field set
 
 - **Intent:** Task files cannot grow into a workflow DSL.
 - **Expected Outcome:** Unknown keys (for example `steps`, `tools`, `agents`) are rejected with a clear error.
 - **Validation:** `cargo test -q --test task_closed_schema`
+- **Status:** Complete
 
 ## Execution *(optional)*
 

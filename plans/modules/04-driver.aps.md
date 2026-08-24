@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| DRV | Josh Boys | Ready |
+| DRV | Josh Boys | Complete |
 
 ## Purpose
 
@@ -52,18 +52,21 @@ Change status to **Ready** when:
 - **Intent:** Each bundled driver can be listed and detected without invoking a model.
 - **Expected Outcome:** Missing binaries report unavailable; ready binaries report ready; `occam drivers` is complete for `codex`, `claude`, `grok`.
 - **Validation:** `cargo test -q --test driver_detect`
+- **Status:** Complete
 
 ### DRV-002: Codex, Claude, and Grok adapters
 
 - **Intent:** Each initial driver maps a RunRequest onto its non-interactive CLI form without sharing a giant lowest-common-denominator argv.
 - **Expected Outcome:** Codex uses `exec`; Claude uses print mode; Grok uses the local binary's non-interactive entry; unsupported required capabilities surface as such.
 - **Validation:** `cargo test -q --test driver_adapt`
+- **Status:** Complete
 
 ### DRV-003: Unavailable fallback
 
 - **Intent:** A configured fallback list is used only when the chosen driver is unavailable at detect time.
-- **Expected Outcome:** Missing default with `drivers = ["codex", "claude"]` selects Claude if Claude is ready; a mid-run failure does not rotate drivers.
+- **Expected Outcome:** Missing default with `fallback = ["codex", "claude"]` selects Claude if Claude is ready; a mid-run failure does not rotate drivers.
 - **Validation:** `cargo test -q --test driver_fallback`
+- **Status:** Complete
 
 ## Execution *(optional)*
 

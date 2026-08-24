@@ -2,7 +2,7 @@
 
 | Field   | Value              |
 |---------|--------------------|
-| Status  | Ready              |
+| Status  | Complete           |
 | Owner   | Josh Boys          |
 | Created | 2026-03-15         |
 | Revised | 2026-08-24         |
@@ -19,15 +19,15 @@ Occam is a stateless Unix-style execution layer for bounded, single-shot agent w
 
 **Success Criteria:**
 
-- [ ] `occam <task>` runs a named task against a local driver and exits
-- [ ] Piped stdin is task input; child stdin is never accidentally inherited
-- [ ] stdout is the task result; stderr is diagnostics
-- [ ] Timeout kills the process group and returns exit `6`
-- [ ] Schema tasks emit valid JSON or fail with exit `7` (never invalid JSON + `0`)
-- [ ] `--driver` / `OCCAM_DRIVER` / config switch Codex, Claude, and Grok without changing the task
-- [ ] Missing driver → exit `3`; unauthenticated driver → exit `4` pointing at that CLI's login
-- [ ] Single Rust binary; no provider SDKs, API keys, or Occam-owned tool loop
-- [ ] No persistent state, memory, or cross-run dependencies
+- [x] `occam <task>` runs a named task against a local driver and exits
+- [x] Piped stdin is task input; child stdin is never accidentally inherited
+- [x] stdout is the task result; stderr is diagnostics
+- [x] Timeout kills the process group and returns exit `6`
+- [x] Schema tasks emit valid JSON or fail with exit `7` (never invalid JSON + `0`)
+- [x] `--driver` / `OCCAM_DRIVER` / config switch Codex, Claude, and Grok without changing the task
+- [x] Missing driver → exit `3`; unauthenticated driver → exit `4` pointing at that CLI's login
+- [x] Single Rust binary; no provider SDKs, API keys, or Occam-owned tool loop
+- [x] No persistent state, memory, or cross-run dependencies
 
 ## Constraints
 
@@ -44,12 +44,12 @@ Occam is a stateless Unix-style execution layer for bounded, single-shot agent w
 
 | Module | Purpose | Status | Dependencies |
 |--------|---------|--------|--------------|
-| [CLI](./modules/01-cli.aps.md) | Invocation surface, flags, signals, process exit | Ready | CFG, TSK, DRV, RUN, OUT |
-| [CFG](./modules/02-config.aps.md) | Config, env, driver command paths, fallback | Ready | — |
-| [TSK](./modules/03-task.aps.md) | Named task definitions | Ready | CFG |
-| [DRV](./modules/04-driver.aps.md) | Local CLI drivers: detect, capabilities, invoke | Ready | CFG |
-| [RUN](./modules/05-run.aps.md) | One child-process lifecycle and external limits | Ready | DRV, TSK |
-| [OUT](./modules/06-output.aps.md) | stdout/stderr, schema, envelope, exit codes | Ready | — |
+| [CLI](./modules/01-cli.aps.md) | Invocation surface, flags, signals, process exit | Complete | CFG, TSK, DRV, RUN, OUT |
+| [CFG](./modules/02-config.aps.md) | Config, env, driver command paths, fallback | Complete | — |
+| [TSK](./modules/03-task.aps.md) | Named task definitions | Complete | CFG |
+| [DRV](./modules/04-driver.aps.md) | Local CLI drivers: detect, capabilities, invoke | Complete | CFG |
+| [RUN](./modules/05-run.aps.md) | One child-process lifecycle and external limits | Complete | DRV, TSK |
+| [OUT](./modules/06-output.aps.md) | stdout/stderr, schema, envelope, exit codes | Complete | — |
 
 ## Risks
 

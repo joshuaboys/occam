@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| RUN | Josh Boys | Ready |
+| RUN | Josh Boys | Complete |
 
 ## Purpose
 
@@ -52,12 +52,14 @@ Change status to **Ready** when:
 - **Intent:** The child receives Occam-supplied input and a defined cwd, not an inherited TTY.
 - **Expected Outcome:** Piped bytes reach the driver as input; the child's working directory is the resolved cwd.
 - **Validation:** `cargo test -q --test run_spawn`
+- **Status:** Complete
 
 ### RUN-002: External timeout and teardown
 
 - **Intent:** A stuck driver cannot hang a pipeline, and children do not outlive Occam.
 - **Expected Outcome:** Exceeded timeout yields exit `6`; the process group is gone; cancel takes the child with it.
 - **Validation:** `cargo test -q --test run_timeout`
+- **Status:** Complete
 
 ## Execution *(optional)*
 
