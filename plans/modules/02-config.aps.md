@@ -2,7 +2,7 @@
 
 | ID | Owner | Status |
 |----|-------|--------|
-| CFG | Josh Boys | Ready |
+| CFG | Josh Boys | Complete |
 
 ## Purpose
 
@@ -11,7 +11,7 @@ Resolves a small, predictable configuration: default driver, driver command path
 ## In Scope
 
 - Load `~/.config/occam/config.toml`, `./occam.toml`, `./.occam.toml` (later overrides earlier)
-- `default_driver`, per-driver `command`, optional `drivers = […]` fallback
+- `default_driver`, per-driver `command`, optional `fallback = […]` unavailable-fallback
 - `OCCAM_DRIVER` environment override
 - Conservative global `timeout` default
 - Clear errors for invalid TOML (exit `2`)
@@ -49,12 +49,14 @@ Change status to **Ready** when:
 - **Intent:** Occam reads the documented config files with later files overriding earlier keys.
 - **Expected Outcome:** Missing files are skipped; invalid TOML fails with exit `2`; defaults apply when unset (`default_driver = "codex"`).
 - **Validation:** `cargo test -q --test config_load`
+- **Status:** Complete
 
 ### CFG-002: Driver command and fallback list
 
 - **Intent:** Each driver has a configurable executable, and an optional fallback list is stored without being interpreted as model routing.
-- **Expected Outcome:** `command` overrides PATH name; `drivers = ["codex", "claude"]` is accepted; empty/unknown ids fail validation.
+- **Expected Outcome:** `command` overrides PATH name; `fallback = ["codex", "claude"]` is accepted; empty/unknown ids fail validation. (`fallback` rather than `drivers = […]` because TOML cannot combine that array with `[drivers.codex]`.)
 - **Validation:** `cargo test -q --test config_drivers`
+- **Status:** Complete
 
 ## Execution *(optional)*
 

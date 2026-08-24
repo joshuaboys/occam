@@ -4,8 +4,10 @@
 default_driver = "codex"
 timeout = "120s"
 
-# Uncomment to run this repo on machines that have Claude but not Codex:
-# drivers = ["codex", "claude"]
+# Uncomment to run this repo on machines that have Claude but not Codex.
+# Fires only when the chosen driver is missing at detect time — not a model router.
+# Named `fallback` because TOML cannot use `drivers = [...]` alongside `[drivers.codex]`.
+# fallback = ["codex", "claude"]
 
 [drivers.codex]
 command = "codex"
@@ -24,7 +26,6 @@ Do not nitpick style. Do not rewrite the patch.
 """
 output = "text"
 timeout = "90s"
-max_turns = 5
 stdin = "required"
 
 [task.diagnose]

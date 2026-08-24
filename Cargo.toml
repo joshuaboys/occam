@@ -1,0 +1,32 @@
+[package]
+name = "occam"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+authors = ["Josh Boys"]
+description = "Stateless Unix-style execution layer for bounded, single-shot agent work"
+license = "MIT"
+repository = "https://github.com/joshuaboys/occam"
+readme = "README.md"
+keywords = ["cli", "agent", "codex", "claude", "automation"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+dirs = "6"
+humantime = "2"
+jsonschema = "0.33"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "process", "io-util", "time", "signal", "sync"] }
+toml = "0.8"
+
+[dev-dependencies]
+serde_json = "1"
+tempfile = "3"
+
+[profile.release]
+strip = true
+lto = true
+opt-level = "z"
