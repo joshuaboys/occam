@@ -1,0 +1,59 @@
+# Example project config + tasks.
+# Copy to ./occam.toml or merge into ~/.config/occam/config.toml
+
+default_driver = "codex"
+timeout = "120s"
+
+# Uncomment to run this repo on machines that have Claude but not Codex:
+# drivers = ["codex", "claude"]
+
+[drivers.codex]
+command = "codex"
+
+[drivers.claude]
+command = "claude"
+
+[drivers.grok]
+command = "grok"
+
+[task.review]
+instructions = """
+Review the supplied change.
+Report only material correctness, security, or maintainability issues.
+Do not nitpick style. Do not rewrite the patch.
+"""
+output = "text"
+timeout = "90s"
+max_turns = 5
+stdin = "required"
+
+[task.diagnose]
+instructions = """
+Diagnose the supplied incident or error payload.
+Return the most likely cause, evidence, and a short next action.
+"""
+output = "json"
+schema = "examples/schemas/diagnose.json"
+timeout = "90s"
+stdin = "required"
+requires = ["structured_output"]
+
+[task.diagnose-k8s]
+instructions = """
+Read the supplied Kubernetes events or resource JSON.
+Identify the failing object, likely cause, and the smallest safe next check.
+"""
+output = "text"
+timeout = "90s"
+stdin = "required"
+
+[task.extract-actions]
+instructions = """
+Extract action items from the supplied notes.
+Each item needs an owner (or unassigned), a verb phrase, and a due date if stated.
+"""
+output = "json"
+schema = "examples/schemas/actions.json"
+timeout = "60s"
+stdin = "required"
+requires = ["structured_output"]
