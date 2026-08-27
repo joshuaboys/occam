@@ -36,6 +36,16 @@ impl Harness {
                 fs::set_permissions(&dest, fs::Permissions::from_mode(0o755)).unwrap();
             }
         }
+        let driver_config = ["codex", "claude", "grok"]
+            .iter()
+            .map(|name| {
+                let command = serde_json::to_string(&bin_dir.join(name).to_string_lossy())
+                    .expect("driver path string");
+                format!("[drivers.{name}]\ncommand = {command}\n")
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        fs::write(config.join("occam/config.toml"), driver_config).unwrap();
         let log = dir.path().join("driver.log");
         Self { dir, bin_dir, log }
     }
@@ -63,11 +73,11 @@ impl Harness {
         c.env("HOME", self.path());
         c.env("XDG_CONFIG_HOME", self.path().join("config"));
         c.env_remove("OCCAM_DRIVER");
-        let mut path = self.bin_dir.display().to_string();
+        let mut paths = vec![self.bin_dir.clone()];
         if let Some(orig) = std::env::var_os("PATH") {
-            path.push(':');
-            path.push_str(&orig.to_string_lossy());
+            paths.extend(std::env::split_paths(&orig));
         }
+        let path = std::env::join_paths(paths).expect("test PATH");
         c.env("PATH", path);
         c.env("OCCAM_FAKE_LOG", &self.log);
         c.stdout(std::process::Stdio::piped());
@@ -91,13 +101,6 @@ pub fn stderr(out: &Output) -> String {
 pub const REVIEW_TOML: &str = r#"
 default_driver = "codex"
 timeout = "5s"
-
-[drivers.codex]
-command = "codex"
-[drivers.claude]
-command = "claude"
-[drivers.grok]
-command = "grok"
 
 [task.review]
 instructions = "Review the supplied change."
