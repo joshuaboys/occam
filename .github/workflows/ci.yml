@@ -6,16 +6,55 @@ on:
   pull_request:
 
 jobs:
-  test:
+  fmt:
+    name: fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
-      - name: Format
-        run: cargo fmt --all -- --check
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - name: Test
         run: cargo test --locked
       - name: Clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+  windows:
+    name: windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      # --all-targets type-checks the #[cfg(not(unix))] branches in
+      # src/run.rs and src/driver/mod.rs, which no other job compiles.
+      - name: Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+      # Unit tests only: the integration harness copies a #!/bin/sh
+      # fixture to an extensionless `codex`/`claude`/`grok` and expects
+      # PATH lookup to execute it, which Windows cannot do.
+      - name: Unit tests
+        run: cargo test --locked --lib
+
+  msrv:
+    name: msrv (1.88)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.88
+      - run: cargo check --locked --all-targets
