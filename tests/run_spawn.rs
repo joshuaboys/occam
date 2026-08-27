@@ -2,6 +2,7 @@ mod common;
 use common::*;
 use std::io::Write;
 use std::process::Stdio;
+use std::time::{Duration, Instant};
 
 #[test]
 fn child_cwd_is_resolved() {
@@ -47,7 +48,7 @@ fn max_output_fails_closed() {
 [task.review]
 instructions = "hi"
 stdin = "optional"
-max_output = 8
+max_output = 20
 "#,
     );
     let out = h
@@ -58,4 +59,58 @@ max_output = 8
         .unwrap();
     assert_eq!(out.status.code(), Some(5), "{}", stderr(&out));
     assert!(stderr(&out).contains("max_output"));
+}
+
+#[test]
+fn max_output_applies_to_stderr() {
+    let h = Harness::new();
+    h.write_occam_toml(
+        r#"
+[task.review]
+instructions = "hi"
+stdin = "optional"
+max_output = 20
+"#,
+    );
+    let out = h
+        .cmd()
+        .env(
+            "OCCAM_FAKE_STDERR",
+            "this is more than twenty bytes on stderr",
+        )
+        .args(["review", "--prompt", "x"])
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(5), "{}", stderr(&out));
+    assert!(stderr(&out).contains("max_output"));
+}
+
+#[test]
+fn descendant_overflow_tears_down_process_group_promptly() {
+    let h = Harness::new();
+    h.write_occam_toml(
+        r#"
+[task.review]
+instructions = "hi"
+stdin = "optional"
+max_output = 20
+"#,
+    );
+    let started = Instant::now();
+    let out = h
+        .cmd()
+        .env(
+            "OCCAM_FAKE_DESCENDANT_STDERR",
+            "this is more than twenty bytes from a descendant",
+        )
+        .args(["review", "--prompt", "x"])
+        .output()
+        .unwrap();
+    let elapsed = started.elapsed();
+    assert_eq!(out.status.code(), Some(5), "{}", stderr(&out));
+    assert!(stderr(&out).contains("max_output"));
+    assert!(
+        elapsed < Duration::from_millis(1500),
+        "process group teardown took {elapsed:?}"
+    );
 }

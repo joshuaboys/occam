@@ -2,6 +2,10 @@
 # Test double for codex/claude/grok. Behaviour is controlled via env vars.
 echo "diag: fake-driver" >&2
 
+if [ -n "${OCCAM_FAKE_STDERR:-}" ]; then
+  printf '%s' "$OCCAM_FAKE_STDERR" >&2
+fi
+
 if [ "${1:-}" = "--help" ]; then
   cat <<'EOF'
 Usage: fake-driver
@@ -26,6 +30,15 @@ fi
 
 if [ -n "${OCCAM_FAKE_SLEEP:-}" ]; then
   sleep "$OCCAM_FAKE_SLEEP"
+fi
+
+if [ -n "${OCCAM_FAKE_DESCENDANT_STDERR:-}" ]; then
+  (
+    sleep "${OCCAM_FAKE_DESCENDANT_DELAY:-0.1}"
+    printf '%s' "$OCCAM_FAKE_DESCENDANT_STDERR" >&2
+    sleep "${OCCAM_FAKE_DESCENDANT_SLEEP:-2}"
+  ) &
+  exit 0
 fi
 
 if [ -n "${OCCAM_FAKE_AUTH:-}" ]; then

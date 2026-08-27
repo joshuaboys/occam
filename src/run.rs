@@ -1,11 +1,10 @@
 use std::path::Path;
 use std::process::Stdio;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
-use tokio::sync::Notify;
+use tokio::sync::mpsc;
 
 use crate::driver::Invocation;
 use crate::error::OccamError;
@@ -59,6 +58,7 @@ pub async fn spawn(
             invocation.program.display()
         ))
     })?;
+    let process_group_id = child.id();
 
     if let Some(bytes) = stdin_bytes {
         if let Some(mut stdin) = child.stdin.take() {
@@ -77,20 +77,35 @@ pub async fn spawn(
         .ok_or_else(|| OccamError::DriverFailed("child stderr not piped".into()))?;
 
     let max = limits.max_output_bytes as usize;
-    let overflow = Arc::new(Notify::new());
-    let overflow_tx = overflow.clone();
+    enum StreamEvent {
+        Complete,
+        Overflow,
+    }
+
+    let (stream_tx, mut stream_rx) = mpsc::unbounded_channel();
+    let stdout_event_tx = stream_tx.clone();
     let stdout_task = tokio::spawn(async move {
         let result = read_limited(&mut stdout, max).await;
-        if result.1 {
-            overflow_tx.notify_one();
-        }
+        let event = if result.1 {
+            StreamEvent::Overflow
+        } else {
+            StreamEvent::Complete
+        };
+        let _ = stdout_event_tx.send(event);
         result
     });
+    let stderr_event_tx = stream_tx.clone();
     let stderr_task = tokio::spawn(async move {
-        let mut buf = Vec::new();
-        let _ = stderr.read_to_end(&mut buf).await;
-        buf
+        let result = read_limited(&mut stderr, max).await;
+        let event = if result.1 {
+            StreamEvent::Overflow
+        } else {
+            StreamEvent::Complete
+        };
+        let _ = stderr_event_tx.send(event);
+        result
     });
+    drop(stream_tx);
 
     let sleep = tokio::time::sleep(limits.timeout);
     tokio::pin!(sleep);
@@ -104,32 +119,60 @@ pub async fn spawn(
         Interrupted,
     }
 
-    let why = tokio::select! {
-        status = child.wait() => {
-            match status {
-                Ok(s) => Why::Exited(s),
-                Err(e) => return Err(OccamError::DriverFailed(format!("wait failed: {e}"))),
+    let mut child_status = None;
+    let mut completed_streams = 0u8;
+    let why = {
+        let child_wait = child.wait();
+        tokio::pin!(child_wait);
+        loop {
+            tokio::select! {
+                status = &mut child_wait, if child_status.is_none() => {
+                    let status = status.map_err(|e| {
+                        OccamError::DriverFailed(format!("wait failed: {e}"))
+                    })?;
+                    if completed_streams == 2 {
+                        break Why::Exited(status);
+                    }
+                    child_status = Some(status);
+                }
+                event = stream_rx.recv(), if completed_streams < 2 => {
+                    match event {
+                        Some(StreamEvent::Overflow) => break Why::Truncated,
+                        Some(StreamEvent::Complete) => {
+                            completed_streams += 1;
+                            if completed_streams == 2 {
+                                if let Some(status) = child_status.take() {
+                                    break Why::Exited(status);
+                                }
+                            }
+                        }
+                        None => {
+                            return Err(OccamError::DriverFailed(
+                                "driver stream readers ended unexpectedly".into(),
+                            ));
+                        }
+                    }
+                }
+                _ = &mut sleep => break Why::Timeout,
+                _ = &mut interrupt => break Why::Interrupted,
             }
         }
-        _ = &mut sleep => Why::Timeout,
-        _ = overflow.notified() => Why::Truncated,
-        _ = &mut interrupt => Why::Interrupted,
     };
 
     let (timed_out, code) = match why {
         Why::Exited(status) => (false, status.code()),
         Why::Timeout => {
-            terminate(&mut child).await;
+            terminate(&mut child, process_group_id).await;
             let _ = child.wait().await;
             (true, None)
         }
         Why::Truncated => {
-            terminate(&mut child).await;
+            terminate(&mut child, process_group_id).await;
             let _ = child.wait().await;
             (false, None)
         }
         Why::Interrupted => {
-            terminate(&mut child).await;
+            terminate(&mut child, process_group_id).await;
             let _ = child.wait().await;
             let _ = stdout_task.await;
             let _ = stderr_task.await;
@@ -137,8 +180,8 @@ pub async fn spawn(
         }
     };
 
-    let (stdout, truncated) = stdout_task.await.unwrap_or((Vec::new(), false));
-    let stderr = stderr_task.await.unwrap_or_default();
+    let (stdout, stdout_truncated) = stdout_task.await.unwrap_or((Vec::new(), false));
+    let (stderr, stderr_truncated) = stderr_task.await.unwrap_or((Vec::new(), false));
 
     Ok(SpawnResult {
         stdout,
@@ -146,7 +189,7 @@ pub async fn spawn(
         code,
         duration: started.elapsed(),
         timed_out,
-        truncated,
+        truncated: stdout_truncated || stderr_truncated,
     })
 }
 
@@ -169,10 +212,10 @@ async fn read_limited<R: AsyncReadExt + Unpin>(r: &mut R, max: usize) -> (Vec<u8
     }
 }
 
-async fn terminate(child: &mut tokio::process::Child) {
+async fn terminate(child: &mut tokio::process::Child, _process_group_id: Option<u32>) {
     #[cfg(unix)]
     {
-        if let Some(pid) = child.id() {
+        if let Some(pid) = _process_group_id {
             unsafe {
                 libc_kill(-(pid as i32), 15);
             }
