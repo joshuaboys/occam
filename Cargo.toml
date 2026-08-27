@@ -2,7 +2,7 @@
 name = "occam-run"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.80"
+rust-version = "1.88"
 authors = ["Josh Boys"]
 description = "Stateless Unix-style execution layer for bounded, single-shot agent work"
 license = "MIT"
